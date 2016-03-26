@@ -13,6 +13,7 @@ function not_dot($s) {
   return !($s === "." or $s === "..");
 }
 if ($_SERVER['REQUEST_METHOD'] === "POST"):
+  is_string($_POST['username']) and is_string($_POST['password']) or die("invalid POST parameters");
   $ldap = ldap_connect("localhost") or die("failed to connect to ldap");
   ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3) or die("failed to set protocol");
   $user = clean_username($_POST['username']);
@@ -23,8 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === "POST"):
     echo "<dl>";
     mkdir('votes/' . $user, 0777, true);
     foreach (array_filter(scandir("positions"), not_dot) as $position) {
-      $vote = clean_username($_POST[$position]);
       echo "<dt>$position</dt>";
+      if (!is_string($_POST[$position])) {
+        echo "<dd>no vote</dd>";
+        continue;
+      }
+      $vote = clean_username($_POST[$position]);
       echo "<dd>$vote</dd>";
       file_put_contents('votes/' . $user . '/' . $position, $vote . "\n");
     }
