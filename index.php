@@ -34,15 +34,18 @@ if ($_SERVER['REQUEST_METHOD'] === "POST"):
   $binddn = "uid=$user,cn=members,dc=yakko,dc=cs,dc=wmich,dc=edu";
   $pass = $_POST['password'];
   if ($user and $pass and $bind = ldap_bind($ldap, $binddn, $pass)) {
+    $votes_dir = 'votes/' . $user;
     echo "<p>Thank you for your vote, $user!</p>";
     echo "<dl>";
-    mkdir('votes/' . $user, 0777, true);
-    foreach (array_filter(scandir("positions"), not_dot) as $position) {
-      $position_file = 'votes/' . $user . '/' . $position;
+    file_exists($votes_dir) or mkdir($votes_dir, 0777, true);
+    foreach (array_filter(scandir("positions"), 'not_dot') as $position) {
+      $position_file = $votes_dir . '/' . $position;
       echo "<dt>$position</dt>";
-      if (!is_string($_POST[$position]) or $_POST[$position] === "") {
+      if (!array_key_exists($position, $_POST)
+          or !is_string($_POST[$position])
+          or $_POST[$position] === "") {
         echo "<dd>no vote</dd>";
-        unlink($position_file);
+        file_exists($position_file) and unlink($position_file);
         continue;
       }
       $vote = clean_username($_POST[$position]);
@@ -56,10 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === "POST"):
 else: ?>
 <h1>CCoWMU Votes</h1>
 <form method="POST">
-<?php foreach (array_filter(scandir("positions"), not_dot) as $position): ?>
+<?php foreach (array_filter(scandir("positions"), 'not_dot') as $position): ?>
   <fieldset>
     <legend><?php echo $position ?></legend>
-  <?php foreach (array_map(trim, file('positions/' . $position)) as $candidate): ?>
+  <?php foreach (array_map('trim', file('positions/' . $position)) as $candidate): ?>
     <div>
     <input type="radio" name="<?php echo $position ?>" value="<?php echo $candidate ?>">
       <label for="<?php echo $candidate ?>"><?php echo $candidate ?></label>
