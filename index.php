@@ -24,14 +24,16 @@ if ($_SERVER['REQUEST_METHOD'] === "POST"):
     echo "<dl>";
     mkdir('votes/' . $user, 0777, true);
     foreach (array_filter(scandir("positions"), not_dot) as $position) {
+      $position_file = 'votes/' . $user . '/' . $position;
       echo "<dt>$position</dt>";
-      if (!is_string($_POST[$position])) {
+      if (!is_string($_POST[$position]) or $_POST[$position] === "") {
         echo "<dd>no vote</dd>";
+        unlink($position_file);
         continue;
       }
       $vote = clean_username($_POST[$position]);
       echo "<dd>$vote</dd>";
-      file_put_contents('votes/' . $user . '/' . $position, $vote . "\n");
+      file_put_contents($position_file, $vote . "\n");
     }
     echo "</dl>";
   } else {
