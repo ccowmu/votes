@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>CCoWMU Votes</title>
+  <style>
+    body {
+      max-width: 20em;
+      margin: 0 auto;
+    }
+  </style>
 </head>
 <body>
 <?php
