@@ -8,6 +8,14 @@
       max-width: 20em;
       margin: 0 auto;
     }
+    input[type="text"],
+    input[type="password"]  {
+      display: block;
+    }
+    input[type="submit"] {
+      width: 100%;
+      margin: 1em 0;
+    }
   </style>
 </head>
 <body>
