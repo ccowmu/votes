@@ -26,6 +26,10 @@ function clean_username($s) {
 function not_dot($s) {
   return !($s === "." or $s === "..");
 }
+function no_vote($s, $position_file) {
+  echo "<dd>no vote</dd>";
+  file_exists($position_file) and unlink($position_file);
+}
 if ($_SERVER['REQUEST_METHOD'] === "POST"):
   is_string($_POST['username']) and is_string($_POST['password']) or die("invalid POST parameters");
   $ldap = ldap_connect("localhost") or die("failed to connect to ldap");
@@ -44,13 +48,17 @@ if ($_SERVER['REQUEST_METHOD'] === "POST"):
       if (!array_key_exists($position, $_POST)
           or !is_string($_POST[$position])
           or $_POST[$position] === "") {
-        echo "<dd>no vote</dd>";
-        file_exists($position_file) and unlink($position_file);
+        no_vote($position_file);
         continue;
       }
       $vote = clean_username($_POST[$position]);
-      echo "<dd>$vote</dd>";
-      file_put_contents($position_file, $vote . "\n");
+      $possible = array_map('trim', file('positions/' . $position));
+      if (in_array($vote, $possible, true)) {
+        echo "<dd>$vote</dd>";
+        file_put_contents($position_file, $vote . "\n");
+      } else {
+        no_vote($position_file);
+      }
     }
     echo "</dl>";
   } else {
